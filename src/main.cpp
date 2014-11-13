@@ -9,11 +9,14 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
 
     MainFrame box;
-    box.move(0,0);
 
     QMainWindow* mainWindow = box.mainWindow();
-    QTextEdit *edit = new QTextEdit(mainWindow);
-    mainWindow->setCentralWidget(edit);
+    //QTextEdit *edit = new QTextEdit(mainWindow);
+    //mainWindow->setCentralWidget(edit);
+
+
+    QTextEdit *edit = new QTextEdit();
+    box.setContentWidget(edit);
 
     box.show();
     return app.exec();

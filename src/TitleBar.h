@@ -1,15 +1,18 @@
 #include <QtWidgets/QtWidgets>
 #include <QMouseEvent>
 
+#define WINDOW_MARGIN 5
+
 class TitleBar : public QWidget
 {
 Q_OBJECT
+
 public:
-    TitleBar(QWidget *parent);
-    void titleChanged();
+    TitleBar(QWidget *parent, const QString &text = QString());
+    void setTitleText(const QString &text);
 
 public slots:
-    void showSmall() { parentWidget()->showMinimized(); }
+    void showSmall();
     void showMaxRestore();
 
 protected:

@@ -1,6 +1,7 @@
 #include "TitleBar.h"
 
-TitleBar::TitleBar(QWidget *parent) : QWidget(parent)
+TitleBar::TitleBar(QWidget *parent, const QString &text)
+    : QWidget(parent)
 {
     // Don't let this widget inherit the parent's backround color
     setAutoFillBackground(true);
@@ -31,7 +32,7 @@ TitleBar::TitleBar(QWidget *parent) : QWidget(parent)
 
 
     mLabel = new QLabel(this);
-    mLabel->setText(parent->windowTitle());
+    mLabel->setText(text);
 
     QHBoxLayout *hbox = new QHBoxLayout(this);
 
@@ -51,10 +52,16 @@ TitleBar::TitleBar(QWidget *parent) : QWidget(parent)
     connect(mMaximizeButton, SIGNAL( clicked() ), this, SLOT(showMaxRestore()));
 }
 
-void TitleBar::titleChanged()
+void TitleBar::setTitleText(const QString &text)
 {
-    mLabel->setText(parentWidget()->windowTitle());
+    mLabel->setText(text);
 }
+
+void TitleBar::showSmall()
+{
+    parentWidget()->showMinimized();
+}
+
 void TitleBar::showMaxRestore()
 {
     if (mMaxNormal) {
@@ -76,15 +83,19 @@ void TitleBar::mousePressEvent(QMouseEvent *me)
 
 void TitleBar::mouseMoveEvent(QMouseEvent *me)
 {
-    if (mMaxNormal)
+    if (mMaxNormal) {
         return;
+    }
+
+    if (mClickPos.x() < WINDOW_MARGIN || mClickPos.x() > this->width() - WINDOW_MARGIN || mClickPos.y() <  WINDOW_MARGIN) {
+        return;
+    }
     parentWidget()->move(me->globalPos() - mClickPos);
 }
 
 void TitleBar::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if(event->button() == Qt::LeftButton)
-    {
+    if(event->button() == Qt::LeftButton) {
         showMaxRestore();
     }
 }

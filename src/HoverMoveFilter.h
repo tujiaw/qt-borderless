@@ -5,7 +5,8 @@
 
 class HoverMoveFilter : public QObject
 {
-Q_OBJECT;
+Q_OBJECT
+
 public:
     HoverMoveFilter(QObject* parent);
 

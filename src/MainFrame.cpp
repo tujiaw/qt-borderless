@@ -1,7 +1,6 @@
 #include "MainFrame.h"
 #include "TitleBar.h"
 #include "HoverMoveFilter.h"
-#include "WindowTitleFilter.h"
 
 MainFrame::MainFrame()
 {
@@ -17,49 +16,30 @@ MainFrame::MainFrame()
     setAttribute(Qt::WA_Hover);
     installEventFilter(new HoverMoveFilter(this));
 
-    // Get title changes
-    installEventFilter(new WindowTitleFilter(this));
-
     // Title
-    mTitleBar = new TitleBar(this);
-    setWindowTitle("Borderless window");
+    mTitleBar = new TitleBar(this, "Borderless window");
 
     mMainWindow = new QMainWindow(this);
     mMainWindow->setWindowFlags(Qt::Widget);
 
-    // Creating action
-    QAction *action = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
-    action->setShortcuts(QKeySequence::Open);
-    action->setStatusTip(tr("Do nothing ;)"));
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->addWidget(mTitleBar);
+    mainLayout->setMargin(WINDOW_MARGIN);
+    mainLayout->setSpacing(0);
 
-    // Creating toolbar
-    QToolBar *toolbar = new QToolBar(mMainWindow);
-    toolbar->addAction(action);
-    mMainWindow->addToolBar(toolbar);
-
-    // Creating menu
-    QMenu *menu = mMainWindow->menuBar()->addMenu(tr("&File"));
-    menu->addAction(action);
-
-    // Creating dock
-    QDockWidget *dockWidget = new QDockWidget(tr("Dock Widget"), this);
-    QPushButton *pushButton = new QPushButton(QIcon::fromTheme("edit-undo"),"Panic",dockWidget);
-    dockWidget->setWidget(pushButton);
-    mMainWindow->addDockWidget(Qt::RightDockWidgetArea, dockWidget);
-
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->addWidget(mTitleBar);
-    vbox->setMargin(0);
-    vbox->setSpacing(0);
-
-    QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(mMainWindow);
-    layout->setMargin(WINDOW_MARGIN);
-    layout->setSpacing(0);
-    vbox->addLayout(layout);
+    QVBoxLayout *contentLayout = new QVBoxLayout();
+    contentLayout->addWidget(mMainWindow);
+    contentLayout->setMargin(WINDOW_MARGIN);
+    contentLayout->setSpacing(0);
+    mainLayout->addLayout(contentLayout);
 
     //HWND hwnd = (HWND)GetActiveWindow();
     //SetWindowLongPtr(hwnd, GWL_STYLE, static_cast<LONG>(WS_VISIBLE |WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX));
+}
+
+void MainFrame::setContentWidget(QWidget *content)
+{
+    mMainWindow->setCentralWidget(content);
 }
 
 bool MainFrame::nativeEvent(const QByteArray &, void *message, long *result) {
@@ -84,6 +64,9 @@ void MainFrame::mousePressEvent(QMouseEvent *e)
         }
         if (right) {
             mClickedPos.setX(width() - e->pos().x());
+        }
+        if (top) {
+            mClickedPos.setY(e->pos().y());
         }
         if (bottom) {
             mClickedPos.setY(height() - e->pos().y());
@@ -135,6 +118,19 @@ void MainFrame::mouseMove(QPoint newPos, QPoint oldPos)
             }
             g.setRight(g.right() + dx);
         }
+
+        if (top) {
+            if (dy < 0 && (oldPos.y() > mClickedPos.y())) {
+                dy += oldPos.y() - mClickedPos.y();
+                if (dy > 0) {
+                    dy = 0;
+                }
+            } else if (dy > 0 && g.height() - dy < minSize.height()) {
+                dy = g.height() - minSize.height();
+            }
+            g.setTop(g.top() + dy);
+        }
+
         if (bottom) {
             // Fix a bug when you try to resize to less than minimum size and
             // then the mouse goes down again.
@@ -151,21 +147,37 @@ void MainFrame::mouseMove(QPoint newPos, QPoint oldPos)
 
     } else {
         QRect r = rect();
-        left = qAbs(newPos.x()- r.left()) <= WINDOW_MARGIN &&
-            newPos.y() > mTitleBar->height();
-        right = qAbs(newPos.x() - r.right()) <= WINDOW_MARGIN &&
-            newPos.y() > mTitleBar->height();
+//        left = qAbs(newPos.x()- r.left()) <= WINDOW_MARGIN &&
+//            newPos.y() > mTitleBar->height();
+//        right = qAbs(newPos.x() - r.right()) <= WINDOW_MARGIN &&
+//            newPos.y() > mTitleBar->height();
+        left = qAbs(newPos.x()- r.left()) <= WINDOW_MARGIN;
+        right = qAbs(newPos.x() - r.right()) <= WINDOW_MARGIN;
+        top = qAbs(newPos.y() - r.top()) <= WINDOW_MARGIN;
         bottom = qAbs(newPos.y() - r.bottom()) <= WINDOW_MARGIN;
-        bool hor = left | right;
+//        bool hor = left | right;
 
-        if (hor && bottom) {
-            if (left)
-                setCursor(Qt::SizeBDiagCursor);
-            else
-                setCursor(Qt::SizeFDiagCursor);
-        } else if (hor) {
+//        if (hor && bottom) {
+//            if (left) {
+//                setCursor(Qt::SizeBDiagCursor);
+//            } else {
+//                setCursor(Qt::SizeFDiagCursor);
+//            }
+//        } else if (hor) {
+//            setCursor(Qt::SizeHorCursor);
+//        } else if (bottom) {
+//            setCursor(Qt::SizeVerCursor);
+//        } else {
+//            setCursor(Qt::ArrowCursor);
+//        }
+
+        if ((left && bottom) || (right && top)) {
+            setCursor(Qt::SizeBDiagCursor);
+        } else if ((left && top) || (right && bottom)) {
+            setCursor(Qt::SizeFDiagCursor);
+        } else if (left || right) {
             setCursor(Qt::SizeHorCursor);
-        } else if (bottom) {
+        } else if (top || bottom) {
             setCursor(Qt::SizeVerCursor);
         } else {
             setCursor(Qt::ArrowCursor);

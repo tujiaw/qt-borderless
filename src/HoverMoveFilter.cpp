@@ -16,6 +16,5 @@ bool HoverMoveFilter::eventFilter(QObject *obj, QEvent *event)
         MainFrame* frame = static_cast<MainFrame *>(obj);
         frame->mouseMove(mouseHoverEvent->pos(), mouseHoverEvent->oldPos());
     }
-    // standard event processing
     return QObject::eventFilter(obj, event);
 }
