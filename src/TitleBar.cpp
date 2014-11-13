@@ -87,7 +87,7 @@ void TitleBar::mouseMoveEvent(QMouseEvent *me)
         return;
     }
 
-    if (mClickPos.x() < WINDOW_MARGIN || mClickPos.x() > this->width() - WINDOW_MARGIN || mClickPos.y() <  WINDOW_MARGIN) {
+    if (mClickPos.x() < WINDOW_MARGIN || mClickPos.x() > this->width() - WINDOW_MARGIN  || mClickPos.y() <  WINDOW_MARGIN) {
         return;
     }
     parentWidget()->move(me->globalPos() - mClickPos);

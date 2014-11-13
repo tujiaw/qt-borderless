@@ -32,9 +32,6 @@ MainFrame::MainFrame()
     contentLayout->setMargin(WINDOW_MARGIN);
     contentLayout->setSpacing(0);
     mainLayout->addLayout(contentLayout);
-
-    //HWND hwnd = (HWND)GetActiveWindow();
-    //SetWindowLongPtr(hwnd, GWL_STYLE, static_cast<LONG>(WS_VISIBLE |WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX));
 }
 
 void MainFrame::setContentWidget(QWidget *content)
@@ -94,8 +91,6 @@ void MainFrame::mouseMove(QPoint newPos, QPoint oldPos)
 
         // We don't resize if the windows has the minimum size
         if (left) {
-            // Fix a bug when you try to resize to less than minimum size and
-            // then the mouse goes right again.
             if (dx < 0 && oldPos.x() > mClickedPos.x() ) {
                 dx += oldPos.x() - mClickedPos.x();
                 if (dx > 0) {
@@ -108,8 +103,6 @@ void MainFrame::mouseMove(QPoint newPos, QPoint oldPos)
         }
 
         if (right) {
-            // Fix a bug when you try to resize to less than minimum size and
-            // then the mouse goes right again.
             if (dx > 0 && (width() - newPos.x() > mClickedPos.x())) {
                 dx -= width() - newPos.x() - mClickedPos.x();
                 if (dx < 0) {
@@ -132,8 +125,6 @@ void MainFrame::mouseMove(QPoint newPos, QPoint oldPos)
         }
 
         if (bottom) {
-            // Fix a bug when you try to resize to less than minimum size and
-            // then the mouse goes down again.
             if (dy > 0 && (height() - newPos.y() > mClickedPos.y())) {
                 dy -= height() - newPos.y() - mClickedPos.y();
                 if (dy < 0) {
@@ -147,29 +138,10 @@ void MainFrame::mouseMove(QPoint newPos, QPoint oldPos)
 
     } else {
         QRect r = rect();
-//        left = qAbs(newPos.x()- r.left()) <= WINDOW_MARGIN &&
-//            newPos.y() > mTitleBar->height();
-//        right = qAbs(newPos.x() - r.right()) <= WINDOW_MARGIN &&
-//            newPos.y() > mTitleBar->height();
         left = qAbs(newPos.x()- r.left()) <= WINDOW_MARGIN;
         right = qAbs(newPos.x() - r.right()) <= WINDOW_MARGIN;
         top = qAbs(newPos.y() - r.top()) <= WINDOW_MARGIN;
         bottom = qAbs(newPos.y() - r.bottom()) <= WINDOW_MARGIN;
-//        bool hor = left | right;
-
-//        if (hor && bottom) {
-//            if (left) {
-//                setCursor(Qt::SizeBDiagCursor);
-//            } else {
-//                setCursor(Qt::SizeFDiagCursor);
-//            }
-//        } else if (hor) {
-//            setCursor(Qt::SizeHorCursor);
-//        } else if (bottom) {
-//            setCursor(Qt::SizeVerCursor);
-//        } else {
-//            setCursor(Qt::ArrowCursor);
-//        }
 
         if ((left && bottom) || (right && top)) {
             setCursor(Qt::SizeBDiagCursor);
